@@ -16,24 +16,30 @@ interface Weather_t {
   dt_txt : string, 
   main : {temp : number, humidity : number}, 
   wind : {speed : number},
-  weather : {main : string}     
+  weather :[{icon : string, description : string}]    
 }
 
 // // TODO: Define a class for the Weather object
 // one day
-class Weather{
+//city, date, icon, iconDescription, tempF, windSpeed, humidity
+//(0K − 273.15) × 9/5 + 32 = -459.7°F
+export class Weather{
   date : string;
-  temp : number;
-  wind : number;
+  tempF : number;
+  windSpeed : number;
   humidity: number;
-  rain: string;
+  icon : string;
+  iconDescription : string;
+  city : string;
 
-  constructor(date : string, temp : number, wind : number, humidity: number, rain: string){
+  constructor(date : string, tempF : number, windSpeed : number, humidity: number, icon : string,iconDescription : string, city : string){
     this.date = date;
-    this.temp = temp;
-    this.wind = wind;
+    this.windSpeed = windSpeed;
     this.humidity = humidity;
-    this.rain = rain;
+    this.tempF = tempF;
+    this.icon = icon;
+    this.iconDescription = iconDescription;
+    this.city = city;
   }
 }
 // // TODO: Complete the WeatherService class
@@ -100,7 +106,7 @@ class WeatherService {
   // // TODO: Create buildWeatherQuery method  
   private buildWeatherQuery(coordinates: Coordinates): string {
     //console.log(`The url: ${this.baseURL}/data/2.5/forecast?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.apiKey}`)
-    return `${this.baseURL}/data/2.5/forecast?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.apiKey}`
+    return `${this.baseURL}/data/2.5/forecast?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.apiKey}&units=imperial`
   }
   // // TODO: Create fetchAndDestructureLocationData method
   private async fetchAndDestructureLocationData() : Promise<Coordinates> {
@@ -113,18 +119,22 @@ class WeatherService {
   
   // // TODO: Build parseCurrentWeather method
   private parseCurrentWeather(response: list_t, index : number) {
-    //Need date, temp, wind, humidity, rain
+    //Need date, temp, windSpeed, humidity, rain
     //need to find the first date.
-    let currentWeather : Weather = new Weather("",0,0,0,"");
+    let currentWeather : Weather = new Weather("",0,0,0,"","","",);
     //console.log(`our list this here: ${response.list}`)
     if (!Object.is(undefined, response.list)){
       const filtered_day_list = response.list.filter((day : any) => day.dt_txt.includes("12:00:00"));
       const date : string = filtered_day_list[index].dt_txt;
-      const temp : number = filtered_day_list[index].main.temp;    
-      const wind : number = filtered_day_list[index].wind.speed;
+      const tempF : number = Number(Object.values(filtered_day_list[index].main)[0].toFixed(0));
+      //console.log(`Here it is: ${tempF}`)
+      const windSpeed : number = filtered_day_list[index].wind.speed;
       const humidity: number = filtered_day_list[index].main.humidity;
-      const rain: string = filtered_day_list[index].weather.main;
-      currentWeather = new Weather(date,temp,wind,humidity,rain);      
+      const icon: string = filtered_day_list[index].weather[0].icon;
+      const iconDescription: string = filtered_day_list[index].weather[0].description;
+      currentWeather = new Weather(date,tempF,windSpeed,humidity,icon,iconDescription,this.city); 
+      //console.log(`Here is the object: ${currentWeather.tempF}`) 
+      //console.log(`Here is the object: ${Object.values(currentWeather)}`)      
     }
     return currentWeather;
     
@@ -132,10 +142,9 @@ class WeatherService {
   }
   // // TODO: Complete buildForecastArray method
   //private async buildForecastArray(currentWeather: Weather, weatherData: any[], index :number) {
-  private async buildForecastArray() {
+  private async buildForecastArray() : Promise<Weather[]>{
     const forecastArray : Weather[] = [];
     
-    // ! CHANGE THIS BACK TO i<5 
     for(let i = 0; i<5; i++){
       await this.fetchAndDestructureLocationData().then(async result =>{
         const coord : Coordinates = result;
@@ -147,14 +156,16 @@ class WeatherService {
   }
   // // TODO: Complete getWeatherForCity method
   async getWeatherForCity(city: string) : Promise<Weather[]>{
+    
     //console.log(`Hello this created a WeatherService object with city name: ${city}`)
-    const myCity = new WeatherService(city);
+    const myCity : WeatherService = new WeatherService(city);
     return await myCity.buildForecastArray().then(result =>{
       console.log(`Good bye here's your array:`)
       for(let i = 0; i<5; i++){
-        console.log(`${Object.values(result[i])}`)
+        console.log(`Value ${Object.values(result[i])}`);
       }
-      return result;
+      let weather_array : Weather[] = result
+      return weather_array;
     });   
   }
 }

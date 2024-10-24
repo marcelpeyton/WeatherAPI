@@ -1,21 +1,26 @@
 import { Router } from 'express';
 import weatherService from '../../service/weatherService.js';
 import historyService from '../../service/historyService.js';
+import { Weather } from '../../service/weatherService.js';
 const router = Router();
 
 // import HistoryService from '../../service/historyService.js';
 // import WeatherService from '../../service/weatherService.js';
 
 // // TODO: POST Request with city name to retrieve weather data
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   // // TODO: GET weather data from city name
   //console.log(`Logging req.body in post ${req.body} and ${Object.values(req.body)} and ${req.body as string}`)
-  if (req.body) {    
+  if (req.body) {   
+    let forecast : Weather [] = [] 
     //weatherService.getWeatherForCity(Object.values(req.body)[0] as string)
-    weatherService.getWeatherForCity(Object.values(req.body)[0] as string)
+    await weatherService.getWeatherForCity(Object.values(req.body)[0] as string).then(result =>{
+      forecast = result;
+      console.log(`${forecast[0].date}`)
+    })
     // // TODO: save city to search history
     historyService.addCity(Object.values(req.body)[0] as string)
-    res.json(`City added successfully`);
+    res.json(forecast);
   }else{
     res.send(`Error in adding feedback`);
   }
