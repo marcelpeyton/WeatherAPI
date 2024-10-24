@@ -160,10 +160,10 @@ class WeatherService {
     //console.log(`Hello this created a WeatherService object with city name: ${city}`)
     const myCity : WeatherService = new WeatherService(city);
     return await myCity.buildForecastArray().then(result =>{
-      console.log(`Good bye here's your array:`)
-      for(let i = 0; i<5; i++){
-        console.log(`Value ${Object.values(result[i])}`);
-      }
+      //console.log(`Good bye here's your array:`)
+      // for(let i = 0; i<5; i++){
+      //   console.log(`Value ${Object.values(result[i])}`);
+      // }
       let weather_array : Weather[] = result
       return weather_array;
     });   

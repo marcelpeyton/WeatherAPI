@@ -16,13 +16,13 @@ router.post('/', async (req, res) => {
     //weatherService.getWeatherForCity(Object.values(req.body)[0] as string)
     await weatherService.getWeatherForCity(Object.values(req.body)[0] as string).then(result =>{
       forecast = result;
-      console.log(`${forecast[0].date}`)
+      //console.log(`${forecast[0].date}`)
     })
     // // TODO: save city to search history
     historyService.addCity(Object.values(req.body)[0] as string)
     res.json(forecast);
   }else{
-    res.send(`Error in adding feedback`);
+    res.send(`Error in adding Weather Service`);
   }
 });
 
@@ -33,6 +33,17 @@ router.get('/history', async (req, res) => {
 });
 
 // * BONUS TODO: DELETE city from search history
-//router.delete('/history/:id', async (req, res) => {});
+router.delete('/history/:id', async (req, res) => {  
+  try {
+    if (!req.params.id) {
+      res.status(400).json({ msg: 'id is required' });
+    }
+    await historyService.removeCity(req.params.id);
+    res.json({ success: 'City successfully removed from search history' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+  });
 
 export default router;

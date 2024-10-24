@@ -47,30 +47,42 @@ class HistoryService {
     const cities = await this.getCities();
     let id = 1;
     let x = 1;
+    let addFlag = true;
     if(cities.length > 0){
       cities.sort((a, b) => (a.id > b.id ? 1 : -1));
-      cities.forEach((city) => {
-        if(x == city.id){
+      cities.forEach((city_o) => {
+        if(city_o.name == city){
+          addFlag = false
+        }
+        if(x == city_o.id){
           x++;
         }
       })
       id = x;
     }    
-    const newCity: City = {
-      name: city, 
-      id : id
-    };
+    if(addFlag){
+      const newCity: City = {
+        name: city, 
+        id : id
+      };
 
-    return await this.getCities()
-    .then((city) => {
-      return [...city, newCity];
-    })
-    .then((updatedCity) => this.write(updatedCity))
-    .then(() => newCity);
+      return await this.getCities()
+      .then((city) => {
+        return [...city, newCity];
+      })
+      .then((updatedCity) => this.write(updatedCity))
+      .then(() => newCity);
+    }
+    else{
+      return await this.getCities();
+    }
   }
   // * BONUS TODO: Define a removeCity method that removes a city from the searchHistory.json file
-  // async removeCity(id: string) {}
-
+  async removeCity(id: string) {    
+    return await this.getCities()
+    .then((cities) => cities.filter((city) => city.id !== Number(id)))
+    .then((filteredCities) => this.write(filteredCities));
+  }
 }
 
 export default new HistoryService();
