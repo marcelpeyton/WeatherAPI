@@ -1,3 +1,4 @@
+import { error } from 'console';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -31,8 +32,9 @@ export class Weather{
   icon : string;
   iconDescription : string;
   city : string;
+  could_not_find_city_flag : boolean
 
-  constructor(date : string, tempF : number, windSpeed : number, humidity: number, icon : string,iconDescription : string, city : string){
+  constructor(date : string, tempF : number, windSpeed : number, humidity: number, icon : string,iconDescription : string, city : string, could_not_find_city_flag :  boolean){
     this.date = date;
     this.windSpeed = windSpeed;
     this.humidity = humidity;
@@ -40,6 +42,7 @@ export class Weather{
     this.icon = icon;
     this.iconDescription = iconDescription;
     this.city = city;
+    this.could_not_find_city_flag = could_not_find_city_flag;
   }
 }
 // // TODO: Complete the WeatherService class
@@ -48,11 +51,13 @@ class WeatherService {
   baseURL = process.env.API_BASE_URL;
   apiKey = process.env.API_KEY;
   city : string
+  could_not_find_city_flag : boolean
   
   constructor(city: string){
     this.baseURL = process.env.API_BASE_URL;
     this.apiKey = process.env.API_KEY;
     this.city = city;
+    this.could_not_find_city_flag = false;
   }
   // // TODO: Create buildGeocodeQuery method
   private buildGeocodeQuery(): string {
@@ -61,18 +66,37 @@ class WeatherService {
   }
 
   // // TODO: Create fetchLocationData method
-  private async fetchLocationData(query: string): Promise<Coordinates> {    
+  private async fetchLocationData(query: string): Promise<Coordinates>  {  
+    try{
     return await (await fetch(query)).json()
     .then((response) => {
-      const data : Coordinates = {
-        lat : response.city.coord.lat,
-        lon: response.city.coord.lon,
-        name: response.city.name,
-        country: response.city.country,
+      if(Number(response.cod) >= 400){
+        throw error("Could not find city!");
       }
-      //console.log(`Logging: fecthlocationData: ${response.city.coord.lat}, Logging the city ${this.city}, and with this query: ${query}`)
-      return data;
+      else{
+        const data : Coordinates = {
+          lat : response.city.coord.lat,
+          lon: response.city.coord.lon,
+          name: response.city.name,
+          country: response.city.country,
+        }
+        return data;
+      }
+    
+      //console.log(`Logging: fecthlocationData: ${response.city.coord.lat}, Logging the city ${this.city}, and with this query: ${query}`) 
+      
     });
+    }
+    catch(e){
+      const data : Coordinates = {
+        lat : 0,
+        lon: 0,
+        name: "",
+        country: "",
+      }
+      this.could_not_find_city_flag = true;
+      return data;
+    }
   }
   
   // // TODO: Create fetchWeatherData method
@@ -121,7 +145,7 @@ class WeatherService {
   private parseCurrentWeather(response: list_t, index : number) {
     //Need date, temp, windSpeed, humidity, rain
     //need to find the first date.
-    let currentWeather : Weather = new Weather("",0,0,0,"","","",);
+    let currentWeather : Weather = new Weather("",0,0,0,"","","",true);
     //console.log(`our list this here: ${response.list}`)
     if (!Object.is(undefined, response.list)){
       const filtered_day_list = response.list.filter((day : any) => day.dt_txt.includes("12:00:00"));
@@ -132,7 +156,7 @@ class WeatherService {
       const humidity: number = filtered_day_list[index].main.humidity;
       const icon: string = filtered_day_list[index].weather[0].icon;
       const iconDescription: string = filtered_day_list[index].weather[0].description;
-      currentWeather = new Weather(date,tempF,windSpeed,humidity,icon,iconDescription,this.city); 
+      currentWeather = new Weather(date,tempF,windSpeed,humidity,icon,iconDescription,this.city,this.could_not_find_city_flag); 
       //console.log(`Here is the object: ${currentWeather.tempF}`) 
       //console.log(`Here is the object: ${Object.values(currentWeather)}`)      
     }
