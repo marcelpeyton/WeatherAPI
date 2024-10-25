@@ -4,11 +4,15 @@
 		"id": 1
 	},
 	{
-		"name": "Denver",
+		"name": "New York City",
 		"id": 2
 	},
 	{
-		"name": "New York City",
+		"name": "Baltimore",
 		"id": 3
+	},
+	{
+		"name": "Chicago",
+		"id": 4
 	}
 ]
