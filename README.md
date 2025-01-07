@@ -9,7 +9,7 @@ Using the https://openweathermap.org/ API, you can get the 5 day forecast of any
   <li><a href="#Installation">Installation</a></li>
   <li><a href="#usage">Usage</a></li>
   <li><a href="#license">License</a></li>
-  <li><a href="#video">Video</a></li>
+  <li><a href="#screenshot">Screenshot</a></li>
 </ol>
   
 
@@ -30,8 +30,8 @@ To use:
 ## License
 Distributed under the MIT. See https://opensource.org/license/mit for more information
 
-## Video
-TBA
+## Screenshot
+![image](https://github.com/user-attachments/assets/ae40f4eb-c7d0-438c-8235-b8675983dc54)
 
   
   
